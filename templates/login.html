@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartHire Portal - Secure Access</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root {
+            --bg-universe: #0f172a;
+            --bg-card-panel: #1e293b;
+            --border-accent: #334155;
+            --text-primary: #cbd5e1;
+            --text-bold: #f8fafc;
+            --form-input-bg: #1e293b;
+        }
+        [data-theme="light"] {
+            --bg-universe: #f1f5f9;
+            --bg-card-panel: #ffffff;
+            --border-accent: #cbd5e1;
+            --text-primary: #334155;
+            --text-bold: #0f172a;
+            --form-input-bg: #f8fafc;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-universe);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.25s ease;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: var(--bg-card-panel);
+            border: 1px solid var(--border-accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: var(--form-input-bg);
+            color: var(--text-bold);
+            border: 1px solid var(--border-accent);
+        }
+        .pwd-toggle-icon {
+            position: absolute;
+            right: 12px;
+            top: 70%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .google-auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .theme-switcher-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+        #error-msg {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="header-row">
+        <h2 style="margin: 0; color: var(--text-bold);">System Login</h2>
+        <button id="theme-toggle" class="theme-switcher-btn">🌙</button>
+    </div>
+
+    <p id="error-msg"></p>
+
+    <form method="POST" action="/login">
+    <div class="input-wrapper">
+        <label style="display:block; margin-bottom:6px; color: var(--text-bold);">Username</label>
+        <input type="text" name="username" placeholder="admin" required>
+    </div>
+    
+    <div class="input-wrapper">
+        <label style="display:block; margin-bottom:6px; color: var(--text-bold);">Password</label>
+        <input type="password" name="password" placeholder="Enter security key" required>
+    </div>
+
+    <button type="submit" class="submit-btn">Login</button>
+</form>
+
+    <div style="text-align: center; margin: 15px 0; color: #64748b; font-size: 0.85rem;">OR</div>
+
+    <button id="google-login-btn" class="google-auth-btn">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" style="width: 18px; margin-right: 10px;">
+        Sign in with Google
+    </button>
+</div>
+
+<script>
+    // 1. INITIALIZE ACTIVE WEB INFRASTRUCTURE CREDENTIALS
+    const firebaseConfig = {
+        apiKey: "AIzaSyAY1kmgvtiS16DMvbs1bnqtmvrRIEUjX9U",
+        authDomain: "smarthire-651d3.firebaseapp.com",
+        projectId: "smarthire-651d3",
+        storageBucket: "smarthire-651d3.firebasestorage.app",
+        messagingSenderId: "872834667590",
+        appId: "1:872834667590:web:0d22fbb2ea12551d072647",
+        measurementId: "G-XKTTLEMP72"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore(); 
+
+    const errorMsg = document.getElementById('error-msg');
+
+    // 🛡️ 2. LIVE CLOUD ROLE VERIFICATION ARCHITECTURE 
+    function routeUserBasedOnRole(user) {
+        if (!user || !user.email) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const emailKey = user.email.toLowerCase().trim();
+        console.log("Querying permissions mapping inside Firestore for identifier:", emailKey);
+        
+        db.collection("users").doc(emailKey).get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    console.log("Database user profile record fetched successfully:", userData);
+                    
+                    if (userData.role === "admin") {
+                        console.log("Access Verification Clear. Routing to Operations Center.");
+                        window.location.href = "/dashboard";
+                        return;
+                    }
+                }
+                
+                // 📝 Default Fallback: Redirect to candidate tracking screen
+                console.warn("User record is not designated an administrator inside the database.");
+                window.location.href = "/candidate/status?email=" + encodeURIComponent(user.email);
+            })
+            .catch((error) => {
+                console.error("Firestore database connection query fault loop:", error);
+                alert("Database connection warning: " + error.message + "\n\nDefaulting safely to candidate verification routing.");
+                window.location.href = "/candidate/status?email=" + encodeURIComponent(user.email);
+            });
+    }
+
+    // // ✉️ 3. EMAIL/PASSWORD AUTHENTICATION LOGIN HANDLER
+    // document.getElementById('login-form').addEventListener('submit', (e) => {
+    //     e.preventDefault();
+    //     const email = document.getElementById('email-field').value;
+    //     const password = document.getElementById('password-field').value;
+
+    //     auth.signInWithEmailAndPassword(email, password)
+    //         .then((userCredential) => {
+    //             routeUserBasedOnRole(userCredential.user);
+    //         })
+    //         .catch((error) => {
+    //             errorMsg.style.display = "block";
+    //             errorMsg.textContent = error.message;
+    //         });
+    // });
+
+    // 🚀 4. GOOGLE OAUTH POPUP SIGN-IN AUTHENTICATION ENGINE
+    // 🚀 4. GOOGLE OAUTH REDIRECT SIGN-IN AUTHENTICATION ENGINE
+   document.getElementById('google-login-btn').addEventListener('click', () => {
+    console.log("Button clicked. Initializing Firebase Auth...");
+    const provider = new firebase.auth.GoogleAuthProvider();
+    
+    // Add this line to force the browser to reveal WHY it fails
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("Success:", result);
+            routeUserBasedOnRole(result.user);
+        })
+        .catch((error) => {
+            console.error("FIREBASE ERROR CODE:", error.code);
+            console.error("FIREBASE ERROR MESSAGE:", error.message);
+            alert("Auth Error: " + error.code); // This will pop up the exact error
+        });
+});
+
+    // 👁️ 5. PASSWORD VISIBILITY COMPONENT TOGGLER
+    const pwdToggler = document.getElementById('pwd-toggle-anchor');
+    const pwdInputField = document.getElementById('password-field');
+    pwdToggler.addEventListener('click', () => {
+        const structuralType = pwdInputField.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwdInputField.setAttribute('type', structuralType);
+        pwdToggler.textContent = structuralType === 'password' ? '👁️' : '🙈';
+    });
+
+    // 🌓 6. VISUAL APP ENVIRONMENT THEME MANAGER
+    const themeSelectorBtn = document.getElementById('theme-toggle');
+    const persistentStorageTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', persistentStorageTheme);
+    themeSelectorBtn.textContent = persistentStorageTheme === 'light' ? '☀️' : '🌙';
+
+    themeSelectorBtn.addEventListener('click', () => {
+        let activeEnvironmentMode = document.documentElement.getAttribute('data-theme');
+        let targetEnvironmentMode = activeEnvironmentMode === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', targetEnvironmentMode);
+        localStorage.setItem('theme', targetEnvironmentMode);
+        themeSelectorBtn.textContent = targetEnvironmentMode === 'light' ? '☀️' : '🌙';
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block page_title %}Strategic Talent Intelligence Insights{% endblock %}
+{% block content %}
+<div class="reports-header-actions">
+    <h3>Enterprise Aggregation Vector Datasets</h3>
+    <a href="{{ url_for('export_csv') }}" class="btn btn-primary">Export BI Compliance Sheet (CSV)</a>
+</div>
+
+<div class="dashboard-split-layout" style="margin-top: 1.5rem; grid-template-columns: 320px 1fr;">
+    
+    <div class="chart-container-card" style="height: 300px;">
+        <h3>Pipeline Funnel</h3>
+        <canvas id="reportsPieChart"></canvas>
+    </div>
+
+    <div class="table-container-card">
+        <h3>High-Demand Skill Gap Diagnostics</h3>
+        <table class="ats-table">
+            <thead>
+                <tr>
+                    <th>Skill Vector ID</th>
+                    <th>Density Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for skill, count in top_skills %}
+                <tr>
+                    <td><code>{{ skill }}</code></td>
+                    <td>
+                        <div class="progress-bar-container">
+                            <span class="progress-bar" style="width: {{ [count * 10, 100]|min }}%;"></span>
+                            <span class="progress-text-val">{{ count }}</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Compact Chart.js Configuration
+    const ctx = document.getElementById('reportsPieChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut', // Use 'doughnut' for a smaller, cleaner look than a pie
+        data: {
+            labels: ['Strong Hire', 'Hire', 'Review', 'Reject'],
+            datasets: [{
+                data: [{{ stats.strong }}, {{ stats.hire }}, {{ stats.review }}, {{ stats.reject }}],
+                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+</script>
+{% endblock %}

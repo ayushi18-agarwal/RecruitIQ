@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Career Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body" style="padding: 2rem; height: auto; min-height: 100vh;">
+    <div class="login-card" style="max-width: 700px; width: 100%;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2>🏢 Corporate Openings Career Portal</h2>
+            <p class="subtitle">Submit credentials directly to our real-time AI recruitment pipeline</p>
+        </div>
+
+        {% if success %}
+            <div class="alert alert-danger" style="background-color: rgba(16, 185, 129, 0.15); color: var(--color-strong); border: 1px solid var(--color-strong);">
+                🎉 Application transmitted successfully! Our AI processing module has logged your profile details.
+            </div>
+        {% endif %}
+
+        <div class="dashboard-split-layout" style="grid-template-columns: 1fr; gap: 1.5rem;">
+            <div class="card-form" style="background: rgba(255,255,255,0.02); padding: 1.5rem;">
+                <h3>Submit Your Application Profile</h3>
+                <form method="POST" action="{{ url_for('public_apply') }}" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Full Professional Name</label>
+                        <input type="text" name="applicant_name" required placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Your Target Role Objective</label>
+                        <select name="job_id" required style="background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 0.75rem 1rem; border-radius: 6px; color: var(--text-primary);">
+                            {% for job in jobs %}
+                                <option value="{{ job.id }}">{{ job.title }} (Requires: {{ job.experience }})</option>
+                            {% else %}
+                                <option value="">No opening slots available at present</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Attach Resume Document (PDF / DOCX formats only)</label>
+                        <input type="file" name="resume" required accept=".pdf,.docx" style="padding: 0.5rem 0;">
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block" style="margin-top: 1rem;">Transmit Secure Application</button>
+                </form>
+            </div>
+            
+            <div class="table-container-card" style="background: transparent; border: none; padding: 0;">
+                <h3>Available Engineering Tracking Positions</h3>
+                {% for job in jobs %}
+                    <div class="job-spec-card" style="margin-bottom: 1rem; background-color: var(--bg-main);">
+                        <div class="job-card-header">
+                            <h4>{{ job.title }}</h4>
+                            <span class="exp-badge">⏱️ {{ job.experience }}</span>
+                        </div>
+                        <p class="job-skills-sub"><strong>Expected Stack:</strong> {{ job.skills }}</p>
+                        <p class="job-desc-preview" style="font-size: 0.8rem; color: var(--text-muted);">{{ job.description[:200] }}...</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

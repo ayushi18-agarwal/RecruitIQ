@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Status Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body" style="padding: 2rem;">
+    <div class="login-card" style="max-width: 750px; width: 100%; margin: 0 auto;">
+        <div style="margin-bottom: 2rem;">
+            <a href="{{ url_for('candidate_home') }}" style="color: #a78bfa; text-decoration: none; font-size: 0.9rem;">← Back to Job Openings</a>
+            <h2 style="margin-top: 0.5rem;">🔍 Application Status Tracker</h2>
+        </div>
+
+        <div class="card-form" style="margin-bottom: 2rem; border: 1px solid var(--border-color);">
+            <form method="POST" action="{{ url_for('candidate_status') }}" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label>Enter Registered Email to Check Status</label>
+                    <input type="email" name="email" value="{{ email }}" required placeholder="your.email@example.com">
+                </div>
+                <button type="submit" class="btn btn-primary" style="background-color: #8b5cf6; padding: 0.75rem 1.5rem; height: 42px;">Track Status</button>
+            </form>
+        </div>
+
+        {% if searched %}
+            <h3 style="margin-top: 2rem;">Application Status</h3>
+            <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px;">
+                {% for sub in submissions %}
+                    <div style="padding: 1rem; border-bottom: 1px solid #313244;">
+                        <strong>Role: {{ sub.job_title }}</strong><br>
+                        <span>Status: {{ sub.recommendation }}</span>
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-muted);">No application entries associated with this email profile.</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+    </div> 
+</body>
+</html>
