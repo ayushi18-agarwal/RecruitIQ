@@ -1,0 +1,15 @@
+flask
+werkzeug
+python-dotenv
+openai
+requests
+authlib
+numpy
+pandas
+scikit-learn
+sentence-transformers
+spacy
+PyMuPDF
+python-magic
+openpyxl
+gunicorn

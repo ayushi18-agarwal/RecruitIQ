@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHire ATS - Advanced Recruiter Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<!-- Add this to <head> -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // Replace with your actual Public Key
+   })();
+</script>
+    <style>
+        /* 🌗 UNIFIED GLOBAL THEME PALETTE & TYPOGRAPHY SYSTEM */
+        :root {
+            --body-bg: #0f172a;
+            --text-color: #cbd5e1;
+            --panel-bg: #1e293b;
+            --sidebar-bg: #0f172a;
+            --border-color: #334155;
+            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        [data-theme="light"] {
+            --body-bg: #f4f6f9;
+            --text-color: #1e293b;
+            --panel-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        /* Standardize layout baseline typography */
+        body, html {
+            font-family: var(--font-stack);
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Force consistent headline styles everywhere */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-stack);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-color) !important;
+        }
+
+        /* App container structure layout matrix */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            box-sizing: border-box;
+            background-color: var(--body-bg);
+            transition: background-color 0.2s ease;
+        }
+
+        /* 👥 SIDEBAR ELEMENT TYPOGRAPHY & THEME MATCHING */
+        .sidebar {
+            font-family: var(--font-stack);
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--border-color);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 260px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .nav-item {
+            font-family: var(--font-stack);
+            font-weight: 500;
+            color: var(--text-color) !important;
+            text-decoration: none;
+            padding: 12px 14px;
+            display: block;
+            border-radius: 6px;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(52, 152, 219, 0.1); 
+        }
+        
+        .user-name {
+            font-family: var(--font-stack);
+            font-weight: 600;
+            color: var(--text-color) !important;
+            margin-bottom: 8px;
+        }
+
+        .brand {
+            font-family: var(--font-stack); 
+            font-weight: 700;
+            color: var(--text-color) !important;
+            font-size: 22px;
+            margin-bottom: 2.5rem;
+        }
+
+        /* 🎙️ UNIFIED VOICE ASSISTANT COMPONENT THEMING */
+        .voice-assistant-panel {
+            background-color: var(--panel-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-color) !important;
+            border-radius: 8px;
+            font-family: var(--font-stack);
+        }
+
+        .voice-action-btn {
+            font-family: var(--font-stack);
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .voice-speech-bubble {
+            background-color: var(--body-bg) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color) !important;
+            font-family: var(--font-stack);
+            font-size: 13px;
+        }
+
+        /* 🌗 UNIFIED THEME TOGGLE ELEMENT */
+        .theme-action-toggle {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 10px;
+            transition: transform 0.1s ease;
+        }
+        .theme-action-toggle:active {
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="auth-guard-wrapper" style="display: none;">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <span class="logo-icon">⚡</span> SmartHire <span style="color: #3498db;">AI</span>
+                </div>
+                <nav class="menu" style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{{ url_for('dashboard') }}" class="nav-item" id="nav-dashboard">📊 Dashboard</a>
+                    <a href="{{ url_for('jobs') }}" class="nav-item" id="nav-jobs">💼 Job Postings</a>
+                    <a href="{{ url_for('candidates') }}" class="nav-item" id="nav-candidates">👥 Candidates</a>
+                    <a href="{{ url_for('reports') }}" class="nav-item" id="nav-reports">📈 Business Analytics</a>
+                </nav>
+            </div>
+            <div class="user-profile" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <p class="user-name">👤 Admin Operator</p>
+<a href="{{ url_for('logout') }}" id="logout-btn" style="text-decoration:none; color:#ef4444; cursor:pointer; font-weight:700; display:inline-block; font-size: inherit; font-family:inherit;">Session Exit</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; padding-bottom: 1rem;">
+                <h1 class="page-title" style="margin: 0; font-size: 24px;">{% block page_title %}{% endblock %}</h1>
+                
+                <div class="voice-assistant-panel" style="display: flex; align-items: center; gap: 10px; padding: 6px 12px;">
+                    <div id="voice-status-glow" class="status-indicator"></div>
+                    <button id="voice-toggle-btn" class="voice-action-btn">
+                        <span class="mic-icon">🎤</span> <span id="voice-btn-text">Start Voice Assistant</span>
+                    </button>
+                    <p id="voice-speech-output" class="voice-speech-bubble" style="margin: 0; padding: 6px 12px; border-radius: 4px;">Awaiting voice trigger instruction...</p>
+                    
+                    <button id="theme-toggle" class="theme-action-toggle" title="Toggle Display Mode">🌙</button>
+                </div>
+            </header>
+            
+            <section class="content-body">
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <script>
+    // --- 1. DARK/LIGHT MODE (Runs immediately) ---
+    (function() {
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const currentSavedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', currentSavedTheme);
+        if (themeToggleBtn) {
+            themeToggleBtn.textContent = currentSavedTheme === 'dark' ? '☀️' : '🌙';
+            themeToggleBtn.addEventListener('click', () => {
+                const activeTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                themeToggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            });
+        }
+    })();
+
+    // --- 2. FIREBASE AUTH GUARD (Isolated Logic) ---
+    const firebaseConfig = {
+        apiKey: "{{ firebase_api_key }}",
+        authDomain: "{{ firebase_auth_domain }}",
+        projectId: "{{ firebase_project_id }}",
+        storageBucket: "{{ firebase_storage_bucket }}",
+        messagingSenderId: "{{ firebase_messaging_sender_id }}",
+        appId: "{{ firebase_app_id }}",
+        measurementId: "{{ firebase_measurement_id }}"
+    };
+
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged((user) => {
+        const currentPath = window.location.pathname;
+        const wrapper = document.getElementById('auth-guard-wrapper');
+        
+        // Allowed paths
+        const publicRoutes = ['/login', '/thank-you', '/', '/candidate', '/candidate/status', '/candidate/apply'];
+        const adminRoutes = ['/dashboard', '/jobs', '/candidates', '/reports'];
+        const isPrepRoute = currentPath.startsWith('/candidates/prep/');
+
+        // If public route, show and exit
+        if (publicRoutes.includes(currentPath)) {
+            if (wrapper) wrapper.style.display = 'flex';
+            return;
+        }
+
+        // If admin/prep route, check user
+        if (adminRoutes.includes(currentPath) || isPrepRoute) {
+            if (!user) {
+                window.location.href = "/login";
+            } else {
+                db.collection("users").doc(user.email.toLowerCase().trim()).get()
+                    .then((doc) => {
+                        if (doc.exists && doc.data().role === "admin") {
+                            if (wrapper) wrapper.style.display = 'flex';
+                        } else {
+                            window.location.href = "/login";
+                        }
+                    }).catch(() => { window.location.href = "/login"; });
+            }
+            return;
+        }
+        
+        // Default: redirect unknown paths
+        window.location.href = "/login";
+    });
+
+    // --- 3. VOICE ASSISTANT (Safe listener) ---
+ // --- 3. VOICE ASSISTANT (Functional Logic) ---
+// --- 3. VOICE ASSISTANT (Stable Version) ---
+// --- 3. VOICE ASSISTANT (Conversational Version) ---
+// --- 3. VOICE ASSISTANT (Correctly Closed) ---
+    window.addEventListener("load", function () {
+        const voiceBtn = document.getElementById("voice-toggle-btn");
+        const speechOutput = document.getElementById("voice-speech-output");
+        
+        if (!voiceBtn) return;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            speechOutput.textContent = "Voice unsupported. Use Chrome.";
+            voiceBtn.style.opacity = "0.5";
+            return;
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+            speechOutput.textContent = text;
+        }
+
+        function setGlow(active) {
+            const glow = document.getElementById('voice-status-glow');
+            if (glow) glow.style.backgroundColor = active ? '#2ecc71' : 'transparent';
+        }
+
+        function handleCommand(transcript) {
+            console.log("Voice heard:", transcript);
+
+            // --- NAVIGATION ---
+            if (/dashboard/.test(transcript)) {
+                speak("Navigating to your dashboard.");
+                return setTimeout(() => window.location.href = "{{ url_for('dashboard') }}", 1200);
+            }
+            if (/candidate/.test(transcript)) {
+                speak("Opening the candidate matrix.");
+                return setTimeout(() => window.location.href = "{{ url_for('candidates') }}", 1200);
+            }
+            if (/job/.test(transcript)) {
+                speak("Pulling up your active job postings.");
+                return setTimeout(() => window.location.href = "{{ url_for('jobs') }}", 1200);
+            }
+            if (/report|analytic/.test(transcript)) {
+                speak("Accessing your business analytics.");
+                return setTimeout(() => window.location.href = "{{ url_for('reports') }}", 1200);
+            }
+
+            // --- PIPELINE SUMMARY ---
+            if (/summary|overview|pipeline|how many|total|stats|statistics/.test(transcript)) {
+                speechOutput.textContent = "Fetching pipeline summary...";
+                fetch('/get-summary')
+                    .then(r => r.json())
+                    .then(data => speak(data.summary))
+                    .catch(() => speak("Sorry, I could not fetch the summary right now."));
+                return;
+            }
+
+            // --- TOP CANDIDATE ---
+            if (/top candidate|leading|best candidate|highest score/.test(transcript)) {
+                fetch('/api/voice/top-candidate')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.name === "None") speak("No candidates have been evaluated yet.");
+                        else speak(`Your top candidate is ${data.name} with a match score of ${data.score} percent.`);
+                    })
+                    .catch(() => speak("Could not retrieve top candidate data."));
+                return;
+            }
+
+            // --- CANDIDATE LOOKUP by name ---
+            const scoreMatch = transcript.match(/(?:score|status)\s+(?:for|of)\s+([a-z\s]+)/);
+            if (scoreMatch) {
+                const name = scoreMatch[1].trim();
+                fetch(`/api/voice/candidate/${encodeURIComponent(name)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.found) speak(`${data.name} has a match score of ${data.score} percent and is marked as ${data.rec}.`);
+                        else speak(`I could not find any candidate named ${name} in the system.`);
+                    });
+                return;
+            }
+
+            // --- GREETINGS ---
+            if (/hello|hi there|hey/.test(transcript)) {
+                return speak("Hello! I'm your SmartHire assistant. You can ask me for a pipeline summary, navigate to any section, or look up a candidate's score.");
+            }
+            if (/help|what can you do|commands/.test(transcript)) {
+                return speak("I can give you a pipeline summary, navigate to dashboard, jobs, candidates, or reports, find the top candidate, or look up a score. Just say the command.");
+            }
+
+            // --- FALLBACK: Ask the AI chatbot ---
+            speechOutput.textContent = "Thinking...";
+            fetch('/api/chatbot/query', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: transcript })
+            })
+            .then(r => r.json())
+            .then(data => speak(data.reply))
+            .catch(() => speak("I didn't catch a known command. Try asking for a summary or saying dashboard."));
+        }
+
+        voiceBtn.addEventListener('click', () => {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                speechOutput.textContent = "Listening...";
+                voiceBtn.querySelector('#voice-btn-text').textContent = "Listening...";
+                setGlow(true);
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                handleCommand(transcript);
+            };
+
+            recognition.onend = () => {
+                voiceBtn.querySelector('#voice-btn-text').textContent = "Start Voice Assistant";
+                setGlow(false);
+            };
+
+            recognition.onerror = (event) => {
+                setGlow(false);
+                voiceBtn.querySelector('#voice-btn-text').textContent = "Start Voice Assistant";
+                if (event.error === 'not-allowed') {
+                    speechOutput.textContent = "Microphone blocked. Allow access in browser settings.";
+                } else if (event.error === 'no-speech') {
+                    speechOutput.textContent = "No speech detected. Try again.";
+                } else {
+                    speechOutput.textContent = `Error: ${event.error}`;
+                }
+            };
+
+            recognition.start();
+        });
+    });
+</script>
+</body>
+</html>

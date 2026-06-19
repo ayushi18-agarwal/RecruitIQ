@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Received — SmartHire</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body" style="display:flex; justify-content:center; align-items:center; min-height:100vh; padding:2rem;">
+
+<div class="login-card" style="max-width:480px; width:100%; text-align:center; padding:2.5rem;">
+    <div style="font-size:52px; margin-bottom:16px;">✅</div>
+    <h2 style="margin-bottom:8px;">Application Received!</h2>
+    <p style="color:var(--text-muted); margin-bottom:28px; font-size:14px;">
+        Thank you for applying. Our AI has begun screening your resume.
+    </p>
+
+    {% if token %}
+    <!-- Personal profile link — bookmarkable -->
+    <a href="{{ url_for('candidate_profile', token=token) }}" class="btn btn-primary btn-block" style="margin-bottom:12px; padding:14px; text-decoration:none; display:block;">
+        📊 View My Application Profile
+    </a>
+    <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:20px;">
+        💡 Bookmark this link — it's your personal dashboard to track this application.
+    </p>
+    {% endif %}
+
+    <form action="/candidate/status" method="POST" style="margin-bottom:12px;">
+        <input type="hidden" name="email" value="{{ email }}">
+        <button type="submit" class="btn btn-secondary btn-block" style="width:100%; padding:12px; border:1px solid var(--border-color); background:transparent; border-radius:6px; cursor:pointer; font-weight:600; color:var(--text-color);">
+            🔍 Search by Email Instead
+        </button>
+    </form>
+
+    <a href="/" style="color:#94a3b8; text-decoration:none; font-size:13px; display:inline-block; margin-top:10px;">← Exit to Welcome Page</a>
+</div>
+
+<script>
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+</script>
+</body>
+</html>

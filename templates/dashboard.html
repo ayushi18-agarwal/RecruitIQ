@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block page_title %}Recruitment Operations Command Center{% endblock %}
+{% block content %}
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px; font-family: var(--font-stack);">
+    
+    <div style="background-color: var(--panel-bg); border: 1px solid var(--border-color); border-top: 4px solid #3498db; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-color); opacity: 0.6; letter-spacing: 0.05em;">Total Submissions</span>
+        <div id="stat-total" style="font-size: 28px; font-weight: 700; margin-top: 8px; color: var(--text-color);">{{ "{:,}".format(stats.total if stats and stats.total else 0) }}</div>
+    </div>
+    
+    <div style="background-color: var(--panel-bg); border: 1px solid var(--border-color); border-top: 4px solid #2ecc71; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #2ecc71; letter-spacing: 0.05em;">Strong Matches</span>
+        <div id="stat-strong" style="font-size: 28px; font-weight: 700; margin-top: 8px; color: var(--text-color);">{{ "{:,}".format(stats.strong if stats and stats.strong else 0) }}</div>
+    </div>
+    
+    <div style="background-color: var(--panel-bg); border: 1px solid var(--border-color); border-top: 4px solid #3498db; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #3498db; letter-spacing: 0.05em;">Qualified Pipelines</span>
+        <div id="stat-hire" style="font-size: 28px; font-weight: 700; margin-top: 8px; color: var(--text-color);">{{ "{:,}".format(stats.hire if stats and stats.hire else 0) }}</div>
+    </div>
+    
+    <div style="background-color: var(--panel-bg); border: 1px solid var(--border-color); border-top: 4px solid #f1c40f; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #f1c40f; letter-spacing: 0.05em;">Requires Review</span>
+        <div id="stat-review" style="font-size: 28px; font-weight: 700; margin-top: 8px; color: var(--text-color);">{{ "{:,}".format(stats.review if stats and stats.review else 0) }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; font-family: var(--font-stack);">
+    
+    <div style="padding: 24px 20px; background-color: var(--panel-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+            📊 Visual Pipeline Matrix Distribution
+        </h3>
+        <div style="position: relative; width: 100%; height: 280px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="pipelineChart"></canvas>
+        </div>
+    </div>
+
+    <div style="padding: 24px 20px; background-color: var(--panel-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: background-color 0.2s ease;">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+            🔝 System Dynamic Rank Queue (Top Profiles)
+        </h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-color);">Rank</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-color);">Candidate</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-color);">Target Role</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-color);">Semantic Index</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-color);">Decision Mapping</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cand in top_candidates %}
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
+                        <td style="padding: 12px; font-weight: 700; opacity: 0.85;">#{{ loop.index }}</td>
+                        <td style="padding: 12px; font-weight: 600;">{{ cand.name }}</td>
+                        <td style="padding: 12px; opacity: 0.9;">{{ cand.job_title }}</td>
+                        <td style="padding: 12px;">
+                            <span style="color: #3498db; font-weight: 700; font-size: 14px;">{{ cand.score }}%</span>
+                        </td>
+                        <td style="padding: 12px;">
+    {% if 'strong' in cand.recommendation.lower() or 'hire' in cand.recommendation.lower() %}
+        <span style="background-color: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(46, 204, 113, 0.3); text-transform: uppercase;">{{ cand.recommendation }}</span>
+    
+    {% elif 'review' in cand.recommendation.lower() %}
+        <!-- INTERVIEW BUTTON -->
+        <button onclick="scheduleInterview('{{ cand.email }}', '{{ cand.name }}')" 
+                style="cursor: pointer; background: rgba(52, 152, 219, 0.15); color: #3498db; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(52, 152, 219, 0.3); text-transform: uppercase; margin-right: 5px;">
+            Interview
+        </button>
+        <!-- REJECT BUTTON -->
+        <a href="mailto:{{ cand.email }}?subject=Update regarding your application&body=Dear {{ cand.name }},%0A%0AThank you for your interest in the position. After careful review, we have decided not to proceed with your application at this time.%0A%0ABest regards,%0AHR Team"
+   onclick="updateStatusToRejected('{{ cand.email }}')"
+   style="text-decoration: none; cursor: pointer; background: rgba(231, 76, 60, 0.15); color: #e74c3c; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(231, 76, 60, 0.3); text-transform: uppercase;">
+    Reject
+</a>
+
+    {% else %}
+        <span style="background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(231, 76, 60, 0.3); text-transform: uppercase;">{{ cand.recommendation }}</span>
+    {% endif %}
+</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; opacity: 0.6; padding: 2.5rem; font-weight: 500;">No profiles processed for active slots.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.chartData = {
+        labels: ['Strong Hire', 'Hire', 'Review', 'Reject'],
+        datasets: [
+            {{ stats.strong if stats and stats.strong else 0 }}, 
+            {{ stats.hire if stats and stats.hire else 0 }}, 
+            {{ stats.review if stats and stats.review else 0 }}, 
+            {{ stats.reject if stats and stats.reject else 0 }}
+        ]
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('pipelineChart').getContext('2d');
+        let currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        
+        // Resolve textual color specifications for canvas elements based on theme states
+        function getChartTextColor(theme) {
+            return theme === 'light' ? '#475569' : '#94a3b8';
+        }
+
+        function getChartGridColor(theme) {
+            return theme === 'light' ? '#e2e8f0' : '#334155';
+        }
+
+        let pipelineChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: window.chartData.labels,
+                datasets: [{
+                    label: 'Candidates Count',
+                    data: window.chartData.datasets,
+                    backgroundColor: [
+                        '#2ecc71', // Strong Hire
+                        '#3498db', // Hire
+                        '#f1c40f', // Review
+                        '#e74c3c'  // Reject
+                    ],
+                    borderRadius: 4,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { boxPadding: 5 }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: getChartTextColor(currentTheme) }
+                    },
+                    y: {
+                        grid: { color: getChartGridColor(currentTheme) },
+                        ticks: { 
+                            color: getChartTextColor(currentTheme),
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // Listen for user display mode changes to update chart elements cleanly
+        const themeButton = document.getElementById('theme-toggle');
+        if (themeButton) {
+            themeButton.addEventListener('click', () => {
+                setTimeout(() => {
+                    const dynamicTheme = document.documentElement.getAttribute('data-theme');
+                    pipelineChart.options.scales.x.ticks.color = getChartTextColor(dynamicTheme);
+                    pipelineChart.options.scales.y.ticks.color = getChartTextColor(dynamicTheme);
+                    pipelineChart.options.scales.y.grid.color = getChartGridColor(dynamicTheme);
+                    pipelineChart.update();
+                }, 50); // Slight timeout to await attributes swap completion
+            });
+        }
+    });
+</script>
+<script>
+    // 1. REJECT STATUS UPDATE (Triggered by the mailto link)
+    function updateStatusToRejected(email) {
+        db.collection("candidates").doc(email).update({
+            status: "rejected"
+        }).then(() => {
+            console.log("Status updated to rejected.");
+        });
+    }
+
+    // 2. INTERVIEW INVITE (Automated Email)
+    function scheduleInterview(email, name) {
+        if (!confirm(`Schedule interview with ${name}?`)) return;
+
+        // Ensure this ID points to your INTERVIEW template in EmailJS
+        emailjs.send("YOUR_SERVICE_ID", "TEMPLATE_ID_INTERVIEW", {
+            to_name: name,
+            to_email: email,
+            message: "We are excited to invite you to an interview round!"
+        })
+        .then(() => {
+            db.collection("candidates").doc(email).update({ status: "interview" })
+              .then(() => { 
+                  alert("Interview invite sent!");
+                  location.reload(); 
+              });
+        })
+        .catch((err) => { alert("Failed to send interview email."); });
+    }
+</script>
+{% endblock %}

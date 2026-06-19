@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% block page_title %}Deep AI Resume Analysis Matrix{% endblock %}
+{% block page_title_display %}Candidate Pipeline{% endblock %}
+
+{% block content %}
+
+<!-- DUPLICATE ALERT BANNER -->
+<div id="dup-banner" style="display:none; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:14px 18px; margin-bottom:16px; align-items:center; justify-content:space-between;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span style="font-size:18px;">⚠️</span>
+    <div>
+      <span style="font-weight:700; color:#f59e0b; font-size:13px;">Duplicate Applications Detected — </span>
+      <span id="dup-count" style="font-size:13px; color:var(--text-color);"></span>
+    </div>
+  </div>
+  <button onclick="document.getElementById('dup-panel').style.display='block'; document.getElementById('dup-banner').style.display='none';"
+    style="font-size:12px; font-weight:700; background:rgba(245,158,11,0.2); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); padding:6px 14px; border-radius:6px; cursor:pointer; font-family:var(--font-stack);">
+    Review Duplicates →
+  </button>
+</div>
+
+<!-- DUPLICATE PANEL -->
+<div id="dup-panel" style="display:none; background:var(--panel-bg); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:20px; margin-bottom:16px; font-family:var(--font-stack);">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
+    <h3 style="margin:0; font-size:15px; font-weight:700; color:#f59e0b;">⚠️ Flagged Duplicate Applications</h3>
+    <button onclick="document.getElementById('dup-panel').style.display='none';" style="background:none; border:none; color:var(--text-color); cursor:pointer; font-size:20px; opacity:0.6;">×</button>
+  </div>
+  <div id="dup-list"></div>
+</div>
+
+<!-- FILTER + UPLOAD — original style -->
+<div style="display:flex; gap:20px; margin-bottom:1.5rem; align-items:stretch;">
+  <div style="flex:1; padding:20px; background-color:var(--panel-bg); color:var(--text-color); border:1px solid var(--border-color); border-radius:8px;">
+    <h4 style="margin-top:0; margin-bottom:10px; font-weight:600; font-size:15px;">Active Profiling Scope Matrix:</h4>
+    <form method="GET" action="/candidates">
+      <select name="job_id" onchange="this.form.submit()" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:6px; background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack); font-size:14px;">
+        <option value="">-- All Active Open Pipelines --</option>
+        {% for j in jobs %}
+          <option value="{{ j.id }}" {% if selected_job_id == j.id %}selected{% endif %}>{{ j.title }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+  <div style="flex:2; padding:20px; background-color:var(--panel-bg); color:var(--text-color); border:1px dashed var(--border-color); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+    <p style="margin:0; font-size:14px; opacity:0.8; font-weight:500;">💡 Select a job tracking queue to open the upload portal panel.</p>
+  </div>
+</div>
+
+<!-- UPLOAD FORM — original style -->
+<div style="margin-bottom:2rem; padding:20px; background-color:var(--panel-bg); color:var(--text-color); border:1px solid var(--border-color); border-radius:8px;">
+  <form action="/candidates" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="job_id" value="{{ selected_job_id }}">
+    <div style="margin-bottom:15px;">
+      <label style="font-weight:600; display:block; margin-bottom:8px; font-size:14px;">Upload Resumes (PDF / DOCX Multi-select)</label>
+      <input type="file" name="resumes" style="color:var(--text-color); font-family:var(--font-stack); font-size:14px;" required multiple accept=".pdf,.docx">
+    </div>
+    <button type="submit" class="btn btn-primary" style="font-family:var(--font-stack); font-weight:600; font-size:14px; padding:10px 20px;">🔍 Analyze Resume</button>
+  </form>
+</div>
+
+<!-- CANDIDATES TABLE — original style + new features -->
+<div style="padding:20px; background-color:var(--panel-bg); color:var(--text-color); border:1px solid var(--border-color); border-radius:8px;">
+  <h3 style="margin-top:0; margin-bottom:20px; font-size:18px; font-weight:600;">Rank-Ordered Processing Queue</h3>
+
+  <table style="width:100%; border-collapse:collapse; font-family:var(--font-stack); font-size:14px;">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Rank</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Applicant</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Role Specification</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Match Score</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Skills Found</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Missing Skills</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">ATS Decision</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">Action Operations</th>
+        <th style="padding:12px; font-weight:600; color:var(--text-color);">AI Co-Pilot Tools</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in candidates %}
+      <tr style="border-bottom:1px solid var(--border-color); transition:background-color 0.2s; {% if c.is_duplicate == 1 %}background:rgba(245,158,11,0.03);{% endif %}">
+
+        <td style="padding:12px; font-weight:700; opacity:0.9;">#{{ loop.index }}</td>
+
+        <!-- Applicant — name + email + dup badge + resume button -->
+        <td style="padding:12px;">
+          <span style="font-weight:600; display:block; margin-bottom:2px;">
+            {{ c.name }}
+            {% if c.is_duplicate == 1 %}
+              <span title="{{ c.duplicate_reason }}" style="display:inline-block; background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); border-radius:4px; font-size:10px; font-weight:700; padding:1px 5px; margin-left:4px; cursor:help;">⚠ DUP</span>
+            {% endif %}
+          </span>
+          <span style="font-size:12px; font-family:monospace; color:#3498db; display:block; margin-bottom:4px;">{{ c.email }}</span>
+          <button onclick="openResumeViewer({{ c.id }}, '{{ c.name|e }}')"
+            style="font-size:11px; font-weight:600; background:rgba(52,152,219,0.1); border:1px solid rgba(52,152,219,0.2); color:#3498db; padding:3px 9px; border-radius:4px; cursor:pointer; font-family:var(--font-stack);">
+            📄 View Resume
+          </button>
+        </td>
+
+        <td style="padding:12px; font-weight:500;">{{ c.job_title }}</td>
+
+        <!-- Score -->
+        <td style="padding:12px;">
+          <span style="color:#3498db; font-weight:700; font-size:15px; display:block; margin-bottom:4px;">{{ c.score }}%</span>
+          <div style="width:80px; height:4px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden;">
+            <div style="height:100%; width:{{ [c.score,100]|min }}%; background:{% if c.score >= 75 %}#2ecc71{% elif c.score >= 55 %}#f59e0b{% else %}#e74c3c{% endif %}; border-radius:99px;"></div>
+          </div>
+        </td>
+
+        <!-- Skills found -->
+        <td style="padding:12px; color:#2ecc71; font-weight:600; font-size:13px;">
+          {{ c.skills_found if c.skills_found else 'None' }}
+        </td>
+
+        <!-- Missing skills -->
+        <td style="padding:12px; font-weight:600; font-size:13px;">
+          {% if c.skills_missing and c.skills_missing|trim != "" %}
+            <span style="color:#e74c3c;">{{ c.skills_missing }}</span>
+          {% else %}
+            <span style="color:#2ecc71;">None missing</span>
+          {% endif %}
+        </td>
+
+        <!-- ATS Decision badge -->
+        <td style="padding:12px;">
+          {% set rec = c.recommendation.lower() %}
+          {% if 'strong' in rec %}
+            <span style="background:rgba(46,204,113,0.15); color:#2ecc71; padding:4px 8px; border-radius:4px; font-weight:700; font-size:12px; border:1px solid rgba(46,204,113,0.3);">{{ c.recommendation.upper() }}</span>
+          {% elif 'hire' in rec %}
+            <span style="background:rgba(52,152,219,0.15); color:#3498db; padding:4px 8px; border-radius:4px; font-weight:700; font-size:12px; border:1px solid rgba(52,152,219,0.3);">{{ c.recommendation.upper() }}</span>
+          {% elif 'review' in rec %}
+            <span style="background:rgba(245,158,11,0.15); color:#f59e0b; padding:4px 8px; border-radius:4px; font-weight:700; font-size:12px; border:1px solid rgba(245,158,11,0.3);">{{ c.recommendation.upper() }}</span>
+          {% else %}
+            <span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:4px 8px; border-radius:4px; font-weight:700; font-size:12px; border:1px solid rgba(231,76,60,0.3);">{{ c.recommendation.upper() }}</span>
+          {% endif %}
+        </td>
+
+        <!-- Action Operations — original style -->
+        <td style="padding:12px;">
+          {% set rec = c.recommendation.lower() %}
+          {% if 'reject' in rec %}
+            <button type="button" onclick="triggerRejectionFlow('{{ c.id }}', '{{ c.name|e }}', '{{ c.email|e }}')"
+              style="font-family:var(--font-stack); font-size:12px; padding:8px 14px; background-color:#34495e; color:#bdc3c7; border:none; border-radius:6px; cursor:pointer; font-weight:600; width:100%;">
+              🚫 Rejected
+            </button>
+          {% elif 'review' in rec %}
+            <button type="button" onclick="triggerRejectionFlow('{{ c.id }}', '{{ c.name|e }}', '{{ c.email|e }}')"
+              style="font-family:var(--font-stack); font-size:12px; padding:8px 14px; background-color:#e74c3c; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; width:100%;">
+              🚫 Reject
+            </button>
+          {% else %}
+            <button type="button"
+              style="font-family:var(--font-stack); font-size:12px; padding:8px 14px; background-color:#2ecc71; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; width:100%;"
+              onclick="openSchedulingModal('{{ c.email|e }}', '{{ c.name|e }}', '{{ c.job_title|e }}', '{{ c.recommendation|e }}')">
+              ✉️ Invite for Next Round
+            </button>
+          {% endif %}
+        </td>
+
+        <!-- AI Co-Pilot — original style -->
+        <td style="padding:12px;">
+          <a href="{{ url_for('candidate_prep', candidate_id=c.id) }}"
+            style="font-family:var(--font-stack); font-size:12px; padding:8px 14px; background-color:#9b59b6; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; text-align:center;">
+            🎯 Generate Interview Prep
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" style="text-align:center; padding:2rem; opacity:0.6; font-size:14px; font-weight:500;">
+          No applicant streams running in the current operational pipeline selection.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════ RESUME VIEWER MODAL ══════════ -->
+<div id="resume-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(5px); z-index:99999; align-items:center; justify-content:center;">
+  <div style="background:var(--panel-bg); border:1px solid var(--border-color); border-radius:12px; width:90%; max-width:780px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.6); font-family:var(--font-stack);">
+
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--text-color);">📄 Resume Viewer</div>
+        <div id="resume-cand-name" style="font-size:12px; color:#3498db; margin-top:2px; font-family:monospace;"></div>
+      </div>
+      <button onclick="closeResumeViewer()" style="width:32px; height:32px; background:var(--body-bg); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; font-size:18px; color:var(--text-color); display:flex; align-items:center; justify-content:center; line-height:1;">×</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="display:flex; align-items:center; gap:10px; padding:10px 22px; border-bottom:1px solid var(--border-color); flex-shrink:0; background:rgba(255,255,255,0.01);">
+      <input id="resume-search" type="text" placeholder="🔍  Search in resume…" oninput="highlightSearch(this.value)"
+        style="flex:1; padding:7px 12px; background:var(--body-bg); border:1px solid var(--border-color); border-radius:6px; color:var(--text-color); font-family:var(--font-stack); font-size:13px; outline:none;">
+      <span id="resume-word-count" style="font-size:11px; color:#64748b; white-space:nowrap; font-family:monospace;"></span>
+      <button onclick="copyResume()" style="font-size:12px; font-weight:600; padding:6px 14px; background:var(--body-bg); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; color:var(--text-color); font-family:var(--font-stack);">📋 Copy</button>
+    </div>
+
+    <!-- Content -->
+    <div id="resume-content" style="flex:1; overflow-y:auto; padding:24px 28px; font-family:monospace; font-size:13px; line-height:1.85; color:var(--text-color); white-space:pre-wrap; word-break:break-word; background:var(--body-bg);">
+      <div style="text-align:center; padding:40px; color:#64748b;">Loading resume…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCHEDULING MODAL — original style ══════════ -->
+<div id="schedulingModal" style="display:none; position:fixed; z-index:999999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.4); align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+  <div style="padding:30px; border-radius:12px; width:100%; max-width:500px; box-shadow:0 10px 30px rgba(0,0,0,0.15); box-sizing:border-box; border:1px solid var(--border-color); background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack);">
+    <h3 style="margin-top:0; border-bottom:2px solid var(--border-color); padding-bottom:12px; font-size:18px; font-weight:600;">📅 Schedule Candidate Evaluation</h3>
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Interview Phase Type</label>
+      <input type="text" id="modalIntType" value="Technical Panel Screen & System Architecture Review" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:6px; background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack); box-sizing:border-box; font-size:14px;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Scheduled Date</label>
+      <input type="date" id="modalIntDate" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:6px; background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack); box-sizing:border-box; font-size:14px;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Scheduled Time Window</label>
+      <input type="text" id="modalIntTime" placeholder="e.g., 2:00 PM - 3:00 PM EST" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:6px; background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack); box-sizing:border-box; font-size:14px;">
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Conference / Meeting Link</label>
+      <input type="url" id="modalIntLink" placeholder="https://meet.google.com/abc-defg-hij" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:6px; background-color:var(--panel-bg); color:var(--text-color); font-family:var(--font-stack); box-sizing:border-box; font-size:14px;">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--border-color); padding-top:15px;">
+      <button type="button" style="font-family:var(--font-stack); background-color:#e74c3c; color:white; padding:8px 16px; border:none; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer;" onclick="closeSchedulingModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" style="font-family:var(--font-stack); font-weight:600; font-size:14px; padding:8px 16px;" onclick="generateDynamicEmail()">Generate & Open Mail</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── DUPLICATE LOADER ───────────────────────────── */
+async function loadDuplicates() {
+  try {
+    const res  = await fetch('/api/duplicates');
+    const dups = await res.json();
+    if (!dups.length) return;
+    const banner = document.getElementById('dup-banner');
+    banner.style.display = 'flex';
+    document.getElementById('dup-count').textContent =
+      `${dups.length} candidate${dups.length > 1 ? 's' : ''} flagged — review before proceeding.`;
+    document.getElementById('dup-list').innerHTML = dups.map(d => `
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-color); gap:12px;">
+        <div style="flex:1;">
+          <div style="font-weight:700; font-size:13px; color:var(--text-color); margin-bottom:3px;">
+            ${d.name} <span style="font-size:11px; font-family:monospace; color:#3498db;">${d.email}</span>
+          </div>
+          <div style="font-size:12px; color:#94a3b8; margin-bottom:5px;">Role: ${d.job_title} &bull; Score: ${d.score}%</div>
+          <div style="font-size:12px; background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); border-radius:4px; padding:4px 10px; display:inline-block;">${d.duplicate_reason}</div>
+        </div>
+        <button onclick="dismissDuplicate(${d.id}, this)"
+          style="flex-shrink:0; font-size:12px; font-weight:600; padding:6px 14px; background:var(--body-bg); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; color:var(--text-color); font-family:var(--font-stack);">
+          ✓ Dismiss
+        </button>
+      </div>`).join('');
+  } catch(e) { console.warn('Duplicates load error:', e); }
+}
+
+async function dismissDuplicate(id, btn) {
+  await fetch(`/api/duplicates/dismiss/${id}`, { method:'POST' });
+  btn.closest('div[style*="border-bottom"]').style.opacity = '0.4';
+  btn.textContent = 'Dismissed'; btn.disabled = true;
+}
+
+/* ── RESUME VIEWER ──────────────────────────────── */
+let _resumeText = '';
+
+async function openResumeViewer(candidateId, name) {
+  const modal = document.getElementById('resume-modal');
+  modal.style.display = 'flex';
+  document.getElementById('resume-cand-name').textContent = name;
+  document.getElementById('resume-content').innerHTML =
+    '<div style="text-align:center;padding:48px;color:#64748b;">Loading resume…</div>';
+  document.getElementById('resume-search').value = '';
+  document.getElementById('resume-word-count').textContent = '';
+
+  try {
+    const res  = await fetch(`/api/resume/${candidateId}`);
+    const data = await res.json();
+    _resumeText = data.resume_text || 'Resume text not available.';
+    const words = _resumeText.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('resume-word-count').textContent = `${words.toLocaleString()} words`;
+    renderResume(_resumeText);
+  } catch(e) {
+    document.getElementById('resume-content').innerHTML =
+      '<div style="padding:24px;color:#e74c3c;">Failed to load resume. Please try again.</div>';
+  }
+}
+
+function renderResume(text) {
+  const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  document.getElementById('resume-content').innerHTML = esc;
+}
+
+function highlightSearch(term) {
+  if (!_resumeText) return;
+  if (!term.trim()) { renderResume(_resumeText); return; }
+  const esc   = _resumeText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  document.getElementById('resume-content').innerHTML =
+    esc.replace(regex, '<mark style="background:#f59e0b;color:#0f172a;border-radius:2px;padding:0 2px;">$1</mark>');
+}
+
+function copyResume() {
+  if (!_resumeText) return;
+  navigator.clipboard.writeText(_resumeText).then(() => {
+    const btn = document.querySelector('#resume-modal button[onclick="copyResume()"]');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!'; btn.style.color = '#2ecc71';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+  });
+}
+
+function closeResumeViewer() {
+  document.getElementById('resume-modal').style.display = 'none';
+  _resumeText = '';
+}
+document.getElementById('resume-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeResumeViewer();
+});
+
+/* ── SCHEDULING MODAL — original logic ──────────── */
+let currentCandidateData = {};
+
+function openSchedulingModal(email, name, jobTitle, recommendation) {
+  currentCandidateData = { email, name, jobTitle, recommendation };
+  if (!recommendation.toLowerCase().includes('strong hire') && !recommendation.toLowerCase().includes('hire')) {
+    sendUpdateEmail(email, name, jobTitle, recommendation, '', '', '', '');
+    return;
+  }
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('modalIntDate').value = tomorrow.toISOString().split('T')[0];
+  document.getElementById('modalIntTime').value = '11:00 AM - 12:00 PM IST';
+  document.getElementById('modalIntLink').value = 'https://meet.google.com/smarthire-interview-room';
+  document.getElementById('schedulingModal').style.display = 'flex';
+}
+
+function closeSchedulingModal() {
+  document.getElementById('schedulingModal').style.display = 'none';
+}
+
+function generateDynamicEmail() {
+  const intType = document.getElementById('modalIntType').value;
+  const intDate = document.getElementById('modalIntDate').value;
+  const intTime = document.getElementById('modalIntTime').value;
+  const intLink = document.getElementById('modalIntLink').value;
+  closeSchedulingModal();
+  sendUpdateEmail(currentCandidateData.email, currentCandidateData.name,
+    currentCandidateData.jobTitle, currentCandidateData.recommendation,
+    intType, intDate, intTime, intLink);
+}
+
+function triggerRejectionFlow(id, name, email) {
+  if (!confirm(`Are you sure you want to initiate the rejection process for ${name}?`)) return;
+  const subject = encodeURIComponent('Update regarding your application at SmartHire');
+  const body    = encodeURIComponent(`Dear ${name},\n\nThank you for giving us the opportunity to review your application. After careful consideration, we have decided to move forward with other candidates whose qualifications more closely align with the requirements of this role.\n\nWe appreciate the time and effort you put into your application and wish you the very best in your professional endeavors.\n\nBest regards,\nThe Hiring Team`);
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+  const form = document.createElement('form');
+  form.method = 'POST'; form.action = `/candidates/reject/${id}`;
+  document.body.appendChild(form); form.submit();
+}
+
+function sendUpdateEmail(email, name, jobTitle, recommendation, intType, intDate, intTime, intLink) {
+  let subject, body;
+  if (intDate) {
+    subject = encodeURIComponent(`Interview Invitation: ${jobTitle} at SmartHire`);
+    body    = encodeURIComponent(`Dear ${name},\n\nWe were impressed with your background and would like to invite you to the next stage of our hiring process for the ${jobTitle} position.\n\nInterview Details:\n- Phase: ${intType}\n- Date: ${intDate}\n- Time: ${intTime}\n- Join Link: ${intLink}\n\nPlease confirm your availability at your earliest convenience.\n\nBest regards,\nThe Hiring Team`);
+  } else {
+    subject = encodeURIComponent('Update regarding your application at SmartHire');
+    body    = encodeURIComponent(`Dear ${name},\n\nThank you for your interest in the ${jobTitle} position. We are continuing our review process and will provide you with an update as soon as possible.\n\nBest regards,\nThe Hiring Team`);
+  }
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+}
+
+document.addEventListener('DOMContentLoaded', loadDuplicates);
+</script>
+
+{% endblock %}
