@@ -1,140 +1,234 @@
 # 🚀 RecruitIQ
 
-## AI-Powered Recruitment Operations Command Center
+### AI-Powered Recruitment Intelligence & Decision Support Platform
 
-RecruitIQ is a full-stack recruitment automation platform designed to streamline the hiring process from candidate application to interview preparation. The platform leverages Artificial Intelligence, Machine Learning, and Large Language Models (LLMs) to automate resume screening, candidate ranking, ATS scoring, skill-gap analysis, and recruitment analytics.
+RecruitIQ is an AI-powered Recruitment Intelligence and Decision Support Platform designed to optimize the entire talent acquisition lifecycle. The platform combines semantic candidate evaluation, recruitment analytics, interview intelligence, workflow automation, and AI-assisted decision support to help organizations make faster and more informed hiring decisions.
 
-Built with Flask and integrated with modern AI technologies, SmartHire AI helps recruiters make faster and more data-driven hiring decisions.
+Unlike traditional Applicant Tracking Systems (ATS) that primarily focus on application tracking and keyword filtering, RecruitIQ leverages Artificial Intelligence, Natural Language Processing (NLP), Semantic Similarity Analysis, and Large Language Models (LLMs) to automate candidate evaluation, skill-gap detection, interview preparation, recruiter insights, and hiring workflows.
 
 ---
 
-## 🎯 Project Objective
+# 🎯 Project Objective
 
-Traditional recruitment involves manually reviewing hundreds of resumes, resulting in significant time consumption and inconsistent evaluations.
+Modern organizations receive hundreds of applications for a single position, making manual resume screening time-consuming and inconsistent.
 
 RecruitIQ addresses this challenge by:
 
-* Automating resume screening
-* Generating ATS compatibility scores
-* Ranking candidates based on job requirements
-* Identifying skill gaps
-* Providing interview preparation assistance
-* Delivering actionable hiring analytics
+✅ Automating candidate screening and ranking
+
+✅ Performing semantic candidate-job matching
+
+✅ Identifying strengths and skill gaps
+
+✅ Generating ATS fit scores and hiring recommendations
+
+✅ Providing AI-powered interview preparation
+
+✅ Delivering recruitment analytics and insights
+
+✅ Supporting recruiters through intelligent decision-making tools
 
 ---
 
-## ✨ Key Features
+# 🌟 Why RecruitIQ?
 
-### 🔍 Resume Analyzer
+Unlike conventional ATS platforms that focus primarily on storing applications and keyword filtering, RecruitIQ functions as a Recruitment Intelligence Platform.
 
-* Upload resumes in PDF and DOCX formats.
-* Extracts candidate information automatically.
-* Performs text preprocessing and skill extraction.
+The system combines:
 
-### 📊 ATS Score Generator
+* Semantic Talent Intelligence
+* AI Candidate Evaluation
+* Skill Gap Analysis
+* Recruitment Analytics
+* Interview Intelligence
+* Voice-Enabled HR Assistance
+* Automated Recruiter Notifications
 
-* Calculates candidate-job compatibility scores.
-* Evaluates resumes against job descriptions.
-* Highlights strengths and weaknesses.
+into a unified ecosystem.
 
-### 🤖 AI-Powered Candidate Evaluation
+RecruitIQ assists recruiters not only in managing applications but also in making faster, smarter, and more data-driven hiring decisions.
 
-* Uses LLM integration (OpenAI/Groq).
-* Generates:
+---
 
-  * Match Scores
-  * Candidate Summaries
-  * Skill Analysis
-  * Missing Skills Reports
+# ✨ Key Features
 
-### 🏆 Candidate Ranking System
+## 🧠 Semantic Talent Intelligence Engine
 
-* Automatically ranks applicants based on:
+* Upload resumes in PDF and DOCX formats
+* Automated resume parsing and candidate information extraction
+* MiniLM-based semantic understanding
+* Job-description aware candidate evaluation
+* Experience validation and profile analysis
 
-  * Skills Match
-  * ATS Score
-  * Resume Relevance
-  * Job Fit
+---
 
-### 📈 Recruitment Dashboard
+## 📊 Recruitment Decision Engine
 
-* Real-time recruitment insights.
-* Candidate analytics.
-* Job application statistics.
-* Interactive visualizations using Chart.js.
+* ATS fit score generation
+* Candidate-job compatibility analysis
+* Hiring recommendation generation
+* Strong Hire / Hire / Review / Reject classification
+* Recruiter-facing decision support
 
-### 🎤 Voice-Enabled HR Assistant
+---
 
-* Natural language interaction.
-* Candidate search through voice commands.
-* HR query automation.
+## 🤖 AI-Powered Candidate Evaluation
 
-### 📝 Interview Preparation Generator
+Uses:
 
-* Generates job-specific interview questions.
-* Creates technical and behavioral question sets.
-* Helps recruiters conduct structured interviews.
+* MiniLM Sentence Transformer
+* Cosine Similarity Analysis
+* LLaMA 3.3 70B (Groq API)
 
-### 🔐 Secure Authentication
+Generates:
+
+* Match Scores
+* Candidate Summaries
+* Skill Analysis
+* Missing Skills Reports
+* Hiring Insights
+
+---
+
+## 🏆 Candidate Ranking System
+
+Automatically ranks applicants based on:
+
+* Semantic Relevance
+* Skill Coverage
+* Experience Match
+* ATS Score
+* Job Fit
+
+---
+
+## 📈 Recruitment Intelligence Dashboard
+
+Provides:
+
+* Real-time hiring analytics
+* Candidate pipeline monitoring
+* Application statistics
+* Skill-gap intelligence
+* Hiring trend visualization
+* Interactive charts using Chart.js
+
+---
+
+## 🎤 Voice-Enabled HR Assistant
+
+* Natural language interaction
+* Voice-based recruiter queries
+* Candidate search through voice commands
+* HR workflow automation
+
+---
+
+## 📝 Interview Intelligence Layer
+
+Powered by LLaMA 3.3 70B
+
+Generates:
+
+* Personalized interview questions
+* Skill-gap focused assessments
+* Technical interview questions
+* Behavioral interview questions
+* Candidate evaluation guidance
+
+---
+
+## 📧 Automated Recruiter Alerts
+
+* Strong Hire detection
+* Email notifications for high-potential candidates
+* Faster recruiter response
+* Automated candidate prioritization
+
+---
+
+## 🔐 Secure Authentication
 
 * Firebase Authentication
 * Google OAuth Integration
 * Role-Based Access Control
-
-### 🛡 Security Features
-
-* File type validation
-* MIME type verification
-* Secure upload handling
-* Session protection mechanisms
+* Session Management
 
 ---
 
-## 🛠 Technology Stack
+## 🛡 Security Features
 
-### Backend
+* File extension validation
+* MIME type verification
+* Binary content inspection
+* Secure upload handling
+* Session protection mechanisms
+* Sandboxed storage architecture
+
+---
+
+# 🛠 Technology Stack
+
+## Backend
 
 * Python
 * Flask
 
-### Database
+## Database
 
 * SQLite
 
-### Machine Learning
+## Artificial Intelligence & NLP
 
-* Scikit-Learn
-* TF-IDF Vectorization
-* Candidate Classification Models
+* MiniLM (all-MiniLM-L6-v2)
+* Sentence Transformers
+* Cosine Similarity
+* LLaMA 3.3 70B (Groq API)
 
-### Artificial Intelligence
+## Resume Processing
 
-* OpenAI API
-* Groq API
+* PyMuPDF
+* PDFPlumber
+* Python-Docx
 
-### Frontend
+## Security
+
+* Google Magika
+* Secure File Validation
+* Session Protection
+
+## Frontend
 
 * HTML5
 * CSS3
 * JavaScript
 * Chart.js
 
-### Authentication
+## Authentication
 
 * Firebase Authentication
 * Google OAuth 2.0
 
-### Resume Processing
+## Voice Assistant
 
-* PDFPlumber
-* Python-Docx
+* Web Speech API
+
+## Integration
+
+* Zapier
+* LinkedIn Job Syndication
+
+## Version Control
+
+* Git
+* GitHub
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```text
-SmartHire/
+RecruitIQ/
 │
 ├── app.py
 ├── utils.py
@@ -177,36 +271,36 @@ SmartHire/
 
 ---
 
-## ⚙️ Installation
+# ⚙️ Installation
 
-### Clone the Repository
+## Clone the Repository
 
 ```bash
 git clone https://github.com/yourusername/RecruitIQ.git
 cd RecruitIQ
 ```
 
-### Create Virtual Environment
+## Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-### Activate Environment
+## Activate Environment
 
-#### Windows
+### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-#### Mac/Linux
+### Mac/Linux
 
 ```bash
 source venv/bin/activate
 ```
 
-### Install Dependencies
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -214,7 +308,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ Run the Application
+# ▶️ Run the Application
 
 ```bash
 python app.py
@@ -228,58 +322,74 @@ http://127.0.0.1:5000
 
 ---
 
-## 📊 System Workflow
+# 📊 System Workflow
 
 ```text
-Candidate Upload Resume
-           │
-           ▼
-Resume Parsing Engine
-           │
-           ▼
-Skill Extraction
-           │
-           ▼
-ATS Score Calculation
-           │
-           ▼
-AI Evaluation Engine
-           │
-           ▼
+Candidate Application
+        │
+        ▼
+Security Validation Layer
+        │
+        ▼
+Document Parsing Engine
+        │
+        ▼
+Semantic Talent Intelligence Engine
+(MiniLM Embeddings)
+        │
+        ▼
+Cosine Similarity Analysis
+        │
+        ▼
+Skill Coverage & Experience Validation
+        │
+        ▼
+Recruitment Decision Engine
+        │
+        ▼
+ATS Score & Recommendation
+        │
+        ▼
 Candidate Ranking
-           │
-           ▼
+        │
+        ▼
 Database Storage
-           │
-           ▼
-Analytics Dashboard
-           │
-           ▼
-Interview Question Generation
+        │
+        ▼
+Recruitment Intelligence Dashboard
+        │
+        ▼
+Interview Intelligence Layer
+(LLaMA 3.3 70B)
+        │
+        ▼
+Voice HR Assistant & Recruiter Alerts
 ```
 
 ---
 
-## 📈 Core Modules
+# 📈 Core Modules
 
-| Module                | Function                       |
-| --------------------- | ------------------------------ |
-| Resume Parser         | Extracts text from resumes     |
-| ATS Engine            | Calculates compatibility score |
-| Candidate Ranking     | Ranks applicants automatically |
-| Skill Gap Analyzer    | Detects missing skills         |
-| Dashboard Analytics   | Visual hiring insights         |
-| Voice Assistant       | HR query automation            |
-| Interview Generator   | AI-based interview preparation |
-| Authentication System | Secure user management         |
+| Module                       | Function                                     |
+| ---------------------------- | -------------------------------------------- |
+| Security Layer               | Validates uploaded files                     |
+| Resume Parser                | Extracts text from resumes                   |
+| Semantic Intelligence Engine | Generates embeddings and evaluates relevance |
+| ATS Engine                   | Calculates fit scores and recommendations    |
+| Skill Gap Analyzer           | Identifies missing skills                    |
+| Candidate Ranking System     | Prioritizes applicants                       |
+| Recruitment Dashboard        | Visual hiring insights                       |
+| Interview Intelligence       | AI-generated interview preparation           |
+| Voice Assistant              | HR query automation                          |
+| Authentication System        | Secure access management                     |
 
 ---
 
-## 🎯 Sample Use Case
+# 🎯 Sample Use Case
 
-### Job Requirement
+## Job Requirement
 
-Python Developer
+**Python Developer**
 
 Required Skills:
 
@@ -287,66 +397,73 @@ Required Skills:
 * Flask
 * Docker
 
-### Candidate Resume Analysis
+### Candidate Evaluation Process
 
-The system automatically:
+RecruitIQ automatically:
 
-* Extracts resume text
-* Identifies skills
-* Compares with job requirements
-* Calculates ATS score
-* Detects missing skills
-* Ranks the candidate
-* Generates interview questions
-
----
-
-## 📸 Screenshots
-
-### Dashboard
-
-Add screenshot here
-
-### Candidate Analysis
-
-Add screenshot here
-
-### ATS Score Report
-
-Add screenshot here
-
-### Voice Assistant
-
-Add screenshot here
+1. Extracts resume content
+2. Generates semantic embeddings using MiniLM
+3. Compares resume with job requirements
+4. Calculates semantic similarity
+5. Identifies strengths and missing skills
+6. Generates ATS fit score
+7. Ranks the candidate
+8. Produces interview questions
+9. Notifies recruiters for Strong Hire candidates
 
 ---
 
-## 🔮 Future Enhancements
 
-* Semantic Search using Vector Databases
-* Candidate Recommendation System
-* Resume Fraud Detection
-* Email Notification Automation
-* Multi-Tenant Recruitment Platform
+# 🔮 Future Roadmap
+
+* PostgreSQL Migration for Enterprise Scalability
+* LinkedIn API Integration
+* Workday Integration
+* AI Candidate Recommendation Engine
 * Predictive Hiring Analytics
+* Resume Fraud Detection
+* Vector Database Integration (FAISS/Pinecone)
+* Video Interview Intelligence
 * AI Interview Copilot
-* Cloud Deployment Support
+* Multi-Tenant SaaS Deployment
+* Docker & Kubernetes Deployment
+* Multilingual Recruitment Support
 
 ---
 
-## 💼 Business Impact
+# 🌍 Sustainable Development Goals (SDGs)
 
-RecruitIQ significantly reduces manual recruitment effort by automating resume screening and candidate evaluation. It enables recruiters to:
+### SDG 8 – Decent Work and Economic Growth
 
-* Reduce screening time
-* Improve hiring accuracy
-* Standardize candidate assessment
-* Identify skill gaps quickly
-* Generate interview plans automatically
+Improves recruitment efficiency and helps organizations connect with suitable talent faster.
+
+### SDG 9 – Industry, Innovation and Infrastructure
+
+Promotes AI-driven innovation within Human Resource Management and recruitment operations.
+
+### SDG 4 – Quality Education
+
+Identifies skill gaps and encourages continuous learning and professional development.
 
 ---
 
-## 👩‍💻 Author
+# 💼 Business Impact
+
+RecruitIQ significantly reduces manual recruitment effort by automating candidate evaluation and recruitment workflows.
+
+Benefits include:
+
+* Reduced resume screening time
+* Faster hiring decisions
+* Improved candidate-job matching
+* Consistent evaluation standards
+* Enhanced recruiter productivity
+* Better talent acquisition outcomes
+* Data-driven recruitment insights
+
+---
+
+# 👩‍💻 Author
 
 **Ayushi Agarwal**
 
@@ -354,4 +471,10 @@ B.Tech Student | AI & Data Science Enthusiast
 
 ---
 
-⭐ If you found this project useful, please consider giving it a star on GitHub!
+## ⭐ If you found this project useful, please consider giving it a star on GitHub!
+
+---
+
+## About
+
+RecruitIQ is an AI-powered Recruitment Intelligence and Decision Support Platform that automates candidate evaluation, interview preparation, recruiter analytics, and hiring workflows using semantic AI and Large Language Models.
