@@ -12,7 +12,7 @@ Built with Flask and integrated with modern AI technologies, SmartHire AI helps 
 
 Traditional recruitment involves manually reviewing hundreds of resumes, resulting in significant time consumption and inconsistent evaluations.
 
-SmartHire AI addresses this challenge by:
+RecruitIQ addresses this challenge by:
 
 * Automating resume screening
 * Generating ATS compatibility scores
@@ -182,8 +182,8 @@ SmartHire/
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/SmartHire.git
-cd SmartHire
+git clone https://github.com/yourusername/RecruitIQ.git
+cd RecruitIQ
 ```
 
 ### Create Virtual Environment
@@ -336,7 +336,7 @@ Add screenshot here
 
 ## 💼 Business Impact
 
-SmartHire AI significantly reduces manual recruitment effort by automating resume screening and candidate evaluation. It enables recruiters to:
+RecruitIQ significantly reduces manual recruitment effort by automating resume screening and candidate evaluation. It enables recruiters to:
 
 * Reduce screening time
 * Improve hiring accuracy
