@@ -1,4 +1,4 @@
-# 🚀 SmartHire AI
+# 🚀 RecruitIQ
 
 ## AI-Powered Recruitment Operations Command Center
 
