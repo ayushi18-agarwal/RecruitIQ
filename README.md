@@ -2,7 +2,7 @@
 
 ## AI-Powered Recruitment Operations Command Center
 
-SmartHire AI is a full-stack recruitment automation platform designed to streamline the hiring process from candidate application to interview preparation. The platform leverages Artificial Intelligence, Machine Learning, and Large Language Models (LLMs) to automate resume screening, candidate ranking, ATS scoring, skill-gap analysis, and recruitment analytics.
+RecruitIQ is a full-stack recruitment automation platform designed to streamline the hiring process from candidate application to interview preparation. The platform leverages Artificial Intelligence, Machine Learning, and Large Language Models (LLMs) to automate resume screening, candidate ranking, ATS scoring, skill-gap analysis, and recruitment analytics.
 
 Built with Flask and integrated with modern AI technologies, SmartHire AI helps recruiters make faster and more data-driven hiring decisions.
 
