@@ -556,15 +556,14 @@ def dashboard():
         
         # This restores the keys (strong, hire, review, reject) that your dashboard.html needs
         stats = conn.execute('''
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN LOWER(recommendation) LIKE '%strong hire%' THEN 1 ELSE 0 END) as strong,
-                SUM(CASE WHEN LOWER(recommendation) LIKE '%hire%' THEN 1 ELSE 0 END) as hire,
-                SUM(CASE WHEN LOWER(recommendation) LIKE '%review%' THEN 1 ELSE 0 END) as review,
-                SUM(CASE WHEN LOWER(recommendation) LIKE '%reject%' THEN 1 ELSE 0 END) as reject
-            FROM candidates
-        ''').fetchone()
-        
+    SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN LOWER(recommendation) LIKE '%strong hire%' THEN 1 ELSE 0 END) as strong,
+        SUM(CASE WHEN recommendation = 'Hire' THEN 1 ELSE 0 END) as hire,
+        SUM(CASE WHEN recommendation = 'Review' THEN 1 ELSE 0 END) as review,
+        SUM(CASE WHEN recommendation = 'Reject' THEN 1 ELSE 0 END) as reject
+    FROM candidates
+''').fetchone()
         top_candidates = conn.execute('''
             SELECT c.*, j.title as job_title FROM candidates c 
             JOIN jobs j ON c.job_id = j.id ORDER BY c.score DESC LIMIT 5
@@ -980,14 +979,14 @@ def get_summary():
     """Voice assistant summary endpoint — returns a natural spoken summary of the pipeline."""
     conn = get_db_connection()
     stats = conn.execute('''
-        SELECT COUNT(*) as total,
-            SUM(CASE WHEN LOWER(recommendation) LIKE '%strong hire%' THEN 1 ELSE 0 END) as strong,
-            SUM(CASE WHEN LOWER(recommendation) LIKE '%hire%' THEN 1 ELSE 0 END) as hire,
-            SUM(CASE WHEN LOWER(recommendation) LIKE '%review%' THEN 1 ELSE 0 END) as review,
-            SUM(CASE WHEN LOWER(recommendation) LIKE '%reject%' THEN 1 ELSE 0 END) as reject,
-            MAX(score) as top_score
-        FROM candidates
-    ''').fetchone()
+    SELECT COUNT(*) as total,
+        SUM(CASE WHEN LOWER(recommendation) LIKE '%strong hire%' THEN 1 ELSE 0 END) as strong,
+        SUM(CASE WHEN recommendation = 'Hire' THEN 1 ELSE 0 END) as hire,
+        SUM(CASE WHEN recommendation = 'Review' THEN 1 ELSE 0 END) as review,
+        SUM(CASE WHEN recommendation = 'Reject' THEN 1 ELSE 0 END) as reject,
+        MAX(score) as top_score
+    FROM candidates
+''').fetchone()
     top = conn.execute(
         'SELECT name, score, recommendation FROM candidates ORDER BY score DESC LIMIT 1'
     ).fetchone()
@@ -1044,7 +1043,7 @@ def api_chatbot_query():
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile", 
             messages=[
-                {"role": "system", "content": "You are a helpful HR assistant for SmartHire."},
+                {"role": "system", "content": "You are a helpful HR assistant for RecruitIQ."},
                 {"role": "user", "content": user_message}
             ]
         )

@@ -65,17 +65,9 @@
         <span style="background-color: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(46, 204, 113, 0.3); text-transform: uppercase;">{{ cand.recommendation }}</span>
     
     {% elif 'review' in cand.recommendation.lower() %}
-        <!-- INTERVIEW BUTTON -->
-        <button onclick="scheduleInterview('{{ cand.email }}', '{{ cand.name }}')" 
-                style="cursor: pointer; background: rgba(52, 152, 219, 0.15); color: #3498db; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(52, 152, 219, 0.3); text-transform: uppercase; margin-right: 5px;">
-            Interview
-        </button>
-        <!-- REJECT BUTTON -->
-        <a href="mailto:{{ cand.email }}?subject=Update regarding your application&body=Dear {{ cand.name }},%0A%0AThank you for your interest in the position. After careful review, we have decided not to proceed with your application at this time.%0A%0ABest regards,%0AHR Team"
-   onclick="updateStatusToRejected('{{ cand.email }}')"
-   style="text-decoration: none; cursor: pointer; background: rgba(231, 76, 60, 0.15); color: #e74c3c; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(231, 76, 60, 0.3); text-transform: uppercase;">
-    Reject
-</a>
+    <span style="background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(245, 158, 11, 0.3); text-transform: uppercase;">
+        Under Review
+    </span>
 
     {% else %}
         <span style="background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid rgba(231, 76, 60, 0.3); text-transform: uppercase;">{{ cand.recommendation }}</span>
