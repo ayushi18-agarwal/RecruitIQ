@@ -13,3 +13,4 @@ PyMuPDF
 python-magic
 openpyxl
 gunicorn
+serverless-wsgi
