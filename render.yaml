@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: recruitiq
+    runtime: python
+    plan: free
+    region: oregon          # change if you want a different region
+    buildCommand: "pip install -r requirements.txt && python -m spacy download en_core_web_sm"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLASK_SECRET_KEY
+        generateValue: true      # Render creates a random secret for you
+      - key: GROQ_API_KEY
+        sync: false             # you'll paste the real value in the Render dashboard
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_ADMIN_EMAIL
+        sync: false
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: FIREBASE_MEASUREMENT_ID
+        sync: false
+      - key: ZAPIER_WEBHOOK_MAIN
+        sync: false
+      - key: ZAPIER_WEBHOOK_REJECT
+        sync: false
+      - key: ZAPIER_WEBHOOK_HIRE
+        sync: false
